@@ -160,6 +160,12 @@
             box-shadow: 0 12px 32px rgba(255, 184, 77, 0.4);
             position: relative;
             animation: bounce 2s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .child-photo-container:active {
+            transform: scale(0.95);
         }
         
         .child-photo {
@@ -688,6 +694,91 @@
             box-shadow: var(--shadow);
             animation: fadeIn 0.4s ease-out;
         }
+        
+        .fullscreen-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .fullscreen-viewer.active {
+            display: flex;
+        }
+        
+        .fullscreen-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px 20px;
+        }
+        
+        .fullscreen-photo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 16px;
+            animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .fullscreen-emoji {
+            font-size: 200px;
+            animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .fullscreen-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: var(--bg-white);
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-dark);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            z-index: 3001;
+        }
+        
+        .fullscreen-close:active {
+            transform: scale(0.9);
+        }
+        
+        .child-photo-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 6px solid var(--primary);
+            box-shadow: 0 12px 32px rgba(255, 184, 77, 0.4);
+            position: relative;
+            animation: bounce 2s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .child-photo-container:active {
+            transform: scale(0.95);
+            animation: none;
+        }
     </style>
 </head>
 <body>
@@ -709,7 +800,7 @@
         </div>
         
         <div class="level-display">
-            <div class="child-photo-container">
+            <div class="child-photo-container" onclick="app.openFullscreen()">
                 <div class="child-photo" id="childPhoto">😊</div>
             </div>
             <div class="level-info">
@@ -797,6 +888,13 @@
     
     <div class="celebration" id="celebration"></div>
     
+    <div class="fullscreen-viewer" id="fullscreenViewer">
+        <button class="fullscreen-close" onclick="app.closeFullscreen()">✕</button>
+        <div class="fullscreen-content" id="fullscreenContent">
+            <!-- Content will be dynamically inserted -->
+        </div>
+    </div>
+    
     <audio id="levelSound" loop></audio>
     
     <script>
@@ -829,7 +927,6 @@
                 this.loadData();
                 this.renderCategories();
                 this.updateDisplay();
-                this.setupVisibilityHandler();
             },
             
             loadData() {
@@ -967,31 +1064,41 @@
                 const displayDate = this.currentDate === today ? 'Today' : 
                     new Date(this.currentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                 document.getElementById('dateDisplay').textContent = displayDate;
-                
-                // Handle sound
-                this.playLevelSound(level.sound);
             },
             
-            playLevelSound(soundUrl) {
-                const audioEl = document.getElementById('levelSound');
+            openFullscreen() {
+                const levelIndex = this.getCurrentLevel();
+                const level = this.levels[levelIndex];
+                const fullscreenContent = document.getElementById('fullscreenContent');
                 
-                if (soundUrl && document.visibilityState === 'visible') {
-                    if (audioEl.src !== soundUrl) {
-                        audioEl.src = soundUrl;
-                        audioEl.play().catch(e => console.log('Audio play failed:', e));
-                    }
+                // Create fullscreen content
+                if (level.photo) {
+                    fullscreenContent.innerHTML = `<img src="${level.photo}" class="fullscreen-photo" alt="Level photo">`;
                 } else {
-                    audioEl.pause();
-                    audioEl.src = '';
+                    const emojis = ['😊', '🌟', '🎉', '🏆'];
+                    fullscreenContent.innerHTML = `<div class="fullscreen-emoji">${emojis[levelIndex] || '😊'}</div>`;
+                }
+                
+                // Show fullscreen
+                document.getElementById('fullscreenViewer').classList.add('active');
+                
+                // Play sound if available
+                if (level.sound) {
+                    const audioEl = document.getElementById('levelSound');
+                    audioEl.src = level.sound;
+                    audioEl.play().catch(e => console.log('Audio play failed:', e));
                 }
             },
             
-            setupVisibilityHandler() {
-                document.addEventListener('visibilitychange', () => {
-                    const levelIndex = this.getCurrentLevel();
-                    const level = this.levels[levelIndex];
-                    this.playLevelSound(level.sound);
-                });
+            closeFullscreen() {
+                // Hide fullscreen
+                document.getElementById('fullscreenViewer').classList.remove('active');
+                
+                // Stop sound
+                const audioEl = document.getElementById('levelSound');
+                audioEl.pause();
+                audioEl.currentTime = 0;
+                audioEl.src = '';
             },
             
             previousDay() {
