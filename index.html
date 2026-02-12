@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#FFB84D">
+    <title>Healthy Eats Tracker</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiSGVhbHRoeSBFYXRzIFRyYWNrZXIiLCJzaG9ydF9uYW1lIjoiSGVhbHRoeSBFYXRzIiwiZGVzY3JpcHRpb24iOiJUcmFjayBoZWFsdGh5IGVhdGluZyBoYWJpdHMgZm9yIGtpZHMiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI0ZGRkZGRiIsInRoZW1lX2NvbG9yIjoiI0ZGQjg0RCIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyUzRSUzQ2NpcmNsZSBjeD0nNTAnIGN5PSc1MCcgcj0nNTAnIGZpbGw9JyUyM0ZGQjg0RCcvJTNFJTNDdGV4dCB4PSc1MCcgeT0nNjUnIGZvbnQtc2l6ZT0nNTAnIHRleHQtYW5jaG9yPSdtaWRkbGUnJTNFJUYwJTlGJThEJTg5JTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJzaXplcyI6IjUxMng1MTIiLCJwdXJwb3NlIjoiYW55IG1hc2thYmxlIn1dfQ==">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Poppins:wght@400;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --primary: #FFB84D;
+            --primary-light: #FFD699;
+            --primary-dark: #FF9E1A;
+            --secondary: #FF6B9D;
+            --success: #4ADE80;
+            --water: #3B82F6;
+            --vegetables: #10B981;
+            --nuts: #A78BFA;
+            --fruits: #F59E0B;
+            --fish: #06B6D4;
+            --eggs: #FDE047;
+            --rice: #F97316;
+            --bg-light: #FFF8F0;
+            --bg-white: #FFFFFF;
+            --text-dark: #2D1B12;
+            --text-medium: #6B5440;
+            --shadow: 0 8px 32px rgba(255, 184, 77, 0.2);
+            --shadow-lg: 0 16px 48px rgba(255, 184, 77, 0.3);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #FFF8F0 0%, #FFE8D6 100%);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            animation: slideDown 0.6s ease-out;
+        }
+        
+        .header h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            text-shadow: 2px 2px 0 rgba(255, 184, 77, 0.2);
+            margin-bottom: 8px;
+        }
+        
+        .settings-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .settings-icon:active {
+            transform: scale(0.9);
+        }
+        
+        .level-display {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out 0.2s backwards;
+        }
+        
+        .level-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 184, 77, 0.1) 0%, rgba(255, 107, 157, 0.1) 100%);
+            pointer-events: none;
+        }
+        
+        .child-photo-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 6px solid var(--primary);
+            box-shadow: 0 12px 32px rgba(255, 184, 77, 0.4);
+            position: relative;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        .child-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 72px;
+        }
+        
+        .level-info {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .level-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+        
+        .level-subtitle {
+            font-size: 14px;
+            color: var(--text-medium);
+        }
+        
+        .date-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            animation: fadeIn 0.8s ease-out 0.3s backwards;
+        }
+        
+        .nav-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--bg-white);
+            border: none;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 24px;
+        }
+        
+        .nav-button:active {
+            transform: scale(0.9);
+        }
+        
+        .date-display {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+            background: var(--bg-white);
+            padding: 12px 24px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .categories-container {
+            flex: 1;
+            animation: fadeIn 0.8s ease-out 0.4s backwards;
+        }
+        
+        .category-item {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+        
+        .category-item:active {
+            transform: scale(0.98);
+        }
+        
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .category-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .category-icon {
+            font-size: 28px;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        
+        .fraction-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .fraction-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: 2px solid;
+            background: var(--bg-white);
+            cursor: pointer;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .fraction-btn:active {
+            transform: scale(0.9);
+        }
+        
+        .fraction-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(255, 184, 77, 0.4);
+        }
+        
+        .progress-bar-container {
+            height: 12px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        .total-progress {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 24px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.8s ease-out 0.5s backwards;
+        }
+        
+        .total-progress-label {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .total-progress-bar-container {
+            height: 24px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        
+        .total-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 24px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .total-progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .modal-header {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .settings-section {
+            margin-bottom: 24px;
+        }
+        
+        .settings-section-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+        
+        .setting-item {
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .setting-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-medium);
+            margin-bottom: 8px;
+        }
+        
+        .setting-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+        
+        .button-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 8px 24px rgba(255, 184, 77, 0.3);
+        }
+        
+        .button-primary:active {
+            transform: scale(0.98);
+        }
+        
+        .button-secondary {
+            background: var(--bg-light);
+            color: var(--text-dark);
+        }
+        
+        .button-secondary:active {
+            transform: scale(0.98);
+        }
+        
+        .level-config {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .level-config-header {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 12px;
+            background: var(--bg-white);
+            border: 2px dashed rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .file-input-label:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .math-challenge {
+            text-align: center;
+        }
+        
+        .challenge-question {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 24px 0;
+        }
+        
+        .challenge-input {
+            width: 100%;
+            padding: 16px;
+            border: 3px solid var(--primary);
+            border-radius: 16px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        
+        .challenge-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255, 184, 77, 0.2);
+        }
+        
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 2000;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            animation: confettiFall 3s ease-out forwards;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(200%);
+            }
+        }
+        
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .category-water .progress-bar { background: var(--water); }
+        .category-vegetables .progress-bar { background: var(--vegetables); }
+        .category-nuts .progress-bar { background: var(--nuts); }
+        .category-fruits .progress-bar { background: var(--fruits); }
+        .category-fish .progress-bar { background: var(--fish); }
+        .category-eggs .progress-bar { background: var(--eggs); }
+        .category-rice .progress-bar { background: var(--rice); }
+        
+        .category-water .fraction-btn.active { background: var(--water); border-color: var(--water); }
+        .category-vegetables .fraction-btn.active { background: var(--vegetables); border-color: var(--vegetables); }
+        .category-nuts .fraction-btn.active { background: var(--nuts); border-color: var(--nuts); }
+        .category-fruits .fraction-btn.active { background: var(--fruits); border-color: var(--fruits); }
+        .category-fish .fraction-btn.active { background: var(--fish); border-color: var(--fish); }
+        .category-eggs .fraction-btn.active { background: var(--eggs); border-color: var(--eggs); }
+        .category-rice .fraction-btn.active { background: var(--rice); border-color: var(--rice); }
+        
+        .import-export-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .import-export-buttons .button {
+            flex: 1;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🍎 Healthy Eats 🥕</h1>
+            <div class="settings-icon" onclick="app.showMathChallenge()">
+                ⚙️
+            </div>
+        </div>
+        
+        <div class="level-display">
+            <div class="child-photo-container">
+                <div class="child-photo" id="childPhoto">😊</div>
+            </div>
+            <div class="level-info">
+                <div class="level-title" id="levelTitle">Keep Going!</div>
+                <div class="level-subtitle" id="levelSubtitle">Eat healthy foods to level up!</div>
+            </div>
+        </div>
+        
+        <div class="date-nav">
+            <button class="nav-button" onclick="app.previousDay()">◀</button>
+            <div class="date-display" id="dateDisplay">Today</div>
+            <button class="nav-button" onclick="app.nextDay()">▶</button>
+        </div>
+        
+        <div class="categories-container" id="categoriesContainer">
+            <!-- Categories will be rendered here -->
+        </div>
+        
+        <div class="total-progress">
+            <div class="total-progress-label">🌟 Total Progress 🌟</div>
+            <div class="total-progress-bar-container">
+                <div class="total-progress-bar" id="totalProgressBar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Math Challenge Modal -->
+    <div class="modal-overlay" id="mathChallengeModal">
+        <div class="modal">
+            <div class="math-challenge">
+                <div class="modal-header">Quick Math! 🧮</div>
+                <div class="challenge-question" id="challengeQuestion">5 × 7 = ?</div>
+                <input type="number" class="challenge-input" id="challengeAnswer" placeholder="Your answer">
+                <button class="button button-primary" onclick="app.checkMathChallenge()">Check Answer</button>
+                <button class="button button-secondary" onclick="app.closeModal('mathChallengeModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">⚙️ Settings</div>
+            
+            <div class="settings-section">
+                <div class="settings-section-title">Import / Export Data</div>
+                <div class="import-export-buttons">
+                    <button class="button button-secondary" onclick="app.importCSV()">📥 Import CSV</button>
+                    <button class="button button-secondary" onclick="app.exportCSV()">📤 Export CSV</button>
+                </div>
+                <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="app.handleCSVImport(event)">
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-section-title">Food Categories</div>
+                <div id="categorySettings">
+                    <!-- Category settings will be rendered here -->
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-section-title">Level Configuration</div>
+                <div id="levelSettings">
+                    <!-- Level settings will be rendered here -->
+                </div>
+            </div>
+            
+            <button class="button button-primary" onclick="app.saveSettings()">💾 Save Settings</button>
+            <button class="button button-secondary" onclick="app.closeModal('settingsModal')">Cancel</button>
+        </div>
+    </div>
+    
+    <div class="celebration" id="celebration"></div>
+    
+    <audio id="levelSound" loop></audio>
+    
+    <script>
+        const app = {
+            currentDate: new Date().toISOString().split('T')[0],
+            dailyData: {},
+            categories: {
+                water: { name: 'Water', icon: '💧', threshold: 1.0, multiplier: 20, color: 'water' },
+                vegetables: { name: 'Vegetables', icon: '🥬', threshold: 1.0, multiplier: 25, color: 'vegetables' },
+                nuts: { name: 'Nuts', icon: '🥜', threshold: 1.0, multiplier: 15, color: 'nuts' },
+                fruits: { name: 'Fruits', icon: '🍎', threshold: 1.0, multiplier: 20, color: 'fruits' },
+                fish: { name: 'Fish/Meat', icon: '🐟', threshold: 1.0, multiplier: 20, color: 'fish' },
+                eggs: { name: 'Eggs', icon: '🥚', threshold: 1.0, multiplier: 15, color: 'eggs' },
+                rice: { name: 'Rice/Dosa/Chapati', icon: '🍚', threshold: 1.0, multiplier: 20, color: 'rice' }
+            },
+            levels: [
+                { threshold: 0, photo: null, sound: null, title: 'Start Your Journey', subtitle: 'Let\'s eat healthy!' },
+                { threshold: 50, photo: null, sound: null, title: 'Good Start!', subtitle: 'Keep it up!' },
+                { threshold: 100, photo: null, sound: null, title: 'Amazing Progress!', subtitle: 'You\'re doing great!' },
+                { threshold: 150, photo: null, sound: null, title: 'Super Star!', subtitle: 'You\'re a champion!' }
+            ],
+            fractions: [0.25, 0.5, 0.75, 1.0],
+            audioContext: null,
+            currentAudio: null,
+            mathChallenge: { num1: 0, num2: 0, answer: 0 },
+            
+            init() {
+                this.loadData();
+                this.renderCategories();
+                this.updateDisplay();
+                this.setupVisibilityHandler();
+            },
+            
+            loadData() {
+                const stored = localStorage.getItem('healthyEatsData');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    this.dailyData = data.dailyData || {};
+                    if (data.categories) this.categories = data.categories;
+                    if (data.levels) this.levels = data.levels;
+                }
+                
+                // Ensure current date has data structure
+                if (!this.dailyData[this.currentDate]) {
+                    this.dailyData[this.currentDate] = {};
+                    Object.keys(this.categories).forEach(cat => {
+                        this.dailyData[this.currentDate][cat] = 0;
+                    });
+                }
+            },
+            
+            saveData() {
+                const data = {
+                    dailyData: this.dailyData,
+                    categories: this.categories,
+                    levels: this.levels
+                };
+                localStorage.setItem('healthyEatsData', JSON.stringify(data));
+            },
+            
+            renderCategories() {
+                const container = document.getElementById('categoriesContainer');
+                container.innerHTML = '';
+                
+                Object.entries(this.categories).forEach(([key, cat]) => {
+                    const value = this.dailyData[this.currentDate][key] || 0;
+                    const categoryScore = this.calculateCategoryScore(key, value);
+                    const progress = Math.min((value / cat.threshold) * 100, 100);
+                    
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = `category-item category-${cat.color}`;
+                    categoryDiv.innerHTML = `
+                        <div class="category-header">
+                            <div class="category-name">
+                                <span class="category-icon">${cat.icon}</span>
+                                <span>${cat.name}</span>
+                            </div>
+                            <div class="fraction-buttons">
+                                ${this.fractions.map(f => `
+                                    <button class="fraction-btn ${value === f ? 'active' : ''}" 
+                                            onclick="app.updateCategory('${key}', ${f})"
+                                            style="border-color: var(--${cat.color})">
+                                        ${f === 0.25 ? '¼' : f === 0.5 ? '½' : f === 0.75 ? '¾' : '1'}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: ${progress}%"></div>
+                        </div>
+                    `;
+                    container.appendChild(categoryDiv);
+                });
+            },
+            
+            updateCategory(category, value) {
+                const previousTotal = this.calculateTotalScore();
+                this.dailyData[this.currentDate][category] = value;
+                this.saveData();
+                this.renderCategories();
+                this.updateDisplay();
+                
+                const newTotal = this.calculateTotalScore();
+                if (newTotal > previousTotal && this.getCurrentLevel() > this.getLevelFromScore(previousTotal)) {
+                    this.celebrate();
+                }
+            },
+            
+            calculateCategoryScore(category, value) {
+                const cat = this.categories[category];
+                return (value / cat.threshold) * cat.multiplier;
+            },
+            
+            calculateTotalScore() {
+                let total = 0;
+                Object.entries(this.dailyData[this.currentDate]).forEach(([key, value]) => {
+                    total += this.calculateCategoryScore(key, value);
+                });
+                return total;
+            },
+            
+            getLevelFromScore(score) {
+                for (let i = this.levels.length - 1; i >= 0; i--) {
+                    if (score >= this.levels[i].threshold) {
+                        return i;
+                    }
+                }
+                return 0;
+            },
+            
+            getCurrentLevel() {
+                const score = this.calculateTotalScore();
+                return this.getLevelFromScore(score);
+            },
+            
+            updateDisplay() {
+                const score = this.calculateTotalScore();
+                const levelIndex = this.getCurrentLevel();
+                const level = this.levels[levelIndex];
+                
+                // Update child photo
+                const photoEl = document.getElementById('childPhoto');
+                if (level.photo) {
+                    photoEl.innerHTML = `<img src="${level.photo}" alt="Level photo" style="width: 100%; height: 100%; object-fit: cover;">`;
+                } else {
+                    const emojis = ['😊', '🌟', '🎉', '🏆'];
+                    photoEl.textContent = emojis[levelIndex] || '😊';
+                }
+                
+                // Update level text
+                document.getElementById('levelTitle').textContent = level.title;
+                document.getElementById('levelSubtitle').textContent = level.subtitle;
+                
+                // Update total progress bar
+                const maxLevel = this.levels[this.levels.length - 1].threshold;
+                const progress = Math.min((score / maxLevel) * 100, 100);
+                document.getElementById('totalProgressBar').style.width = `${progress}%`;
+                
+                // Update date display
+                const today = new Date().toISOString().split('T')[0];
+                const displayDate = this.currentDate === today ? 'Today' : 
+                    new Date(this.currentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                document.getElementById('dateDisplay').textContent = displayDate;
+                
+                // Handle sound
+                this.playLevelSound(level.sound);
+            },
+            
+            playLevelSound(soundUrl) {
+                const audioEl = document.getElementById('levelSound');
+                
+                if (soundUrl && document.visibilityState === 'visible') {
+                    if (audioEl.src !== soundUrl) {
+                        audioEl.src = soundUrl;
+                        audioEl.play().catch(e => console.log('Audio play failed:', e));
+                    }
+                } else {
+                    audioEl.pause();
+                    audioEl.src = '';
+                }
+            },
+            
+            setupVisibilityHandler() {
+                document.addEventListener('visibilitychange', () => {
+                    const levelIndex = this.getCurrentLevel();
+                    const level = this.levels[levelIndex];
+                    this.playLevelSound(level.sound);
+                });
+            },
+            
+            previousDay() {
+                const date = new Date(this.currentDate);
+                date.setDate(date.getDate() - 1);
+                this.currentDate = date.toISOString().split('T')[0];
+                
+                if (!this.dailyData[this.currentDate]) {
+                    this.dailyData[this.currentDate] = {};
+                    Object.keys(this.categories).forEach(cat => {
+                        this.dailyData[this.currentDate][cat] = 0;
+                    });
+                }
+                
+                this.renderCategories();
+                this.updateDisplay();
+            },
+            
+            nextDay() {
+                const date = new Date(this.currentDate);
+                const today = new Date().toISOString().split('T')[0];
+                
+                if (this.currentDate < today) {
+                    date.setDate(date.getDate() + 1);
+                    this.currentDate = date.toISOString().split('T')[0];
+                    
+                    if (!this.dailyData[this.currentDate]) {
+                        this.dailyData[this.currentDate] = {};
+                        Object.keys(this.categories).forEach(cat => {
+                            this.dailyData[this.currentDate][cat] = 0;
+                        });
+                    }
+                    
+                    this.renderCategories();
+                    this.updateDisplay();
+                }
+            },
+            
+            celebrate() {
+                const celebration = document.getElementById('celebration');
+                celebration.innerHTML = '';
+                
+                const colors = ['#FFB84D', '#FF6B9D', '#4ADE80', '#3B82F6', '#A78BFA'];
+                
+                for (let i = 0; i < 50; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.left = Math.random() * 100 + '%';
+                        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                        celebration.appendChild(confetti);
+                        
+                        setTimeout(() => confetti.remove(), 3000);
+                    }, i * 30);
+                }
+            },
+            
+            showMathChallenge() {
+                this.mathChallenge.num1 = Math.floor(Math.random() * 9) + 2;
+                this.mathChallenge.num2 = Math.floor(Math.random() * 9) + 2;
+                this.mathChallenge.answer = this.mathChallenge.num1 * this.mathChallenge.num2;
+                
+                document.getElementById('challengeQuestion').textContent = 
+                    `${this.mathChallenge.num1} × ${this.mathChallenge.num2} = ?`;
+                document.getElementById('challengeAnswer').value = '';
+                
+                this.openModal('mathChallengeModal');
+            },
+            
+            checkMathChallenge() {
+                const answer = parseInt(document.getElementById('challengeAnswer').value);
+                
+                if (answer === this.mathChallenge.answer) {
+                    this.closeModal('mathChallengeModal');
+                    this.showSettings();
+                } else {
+                    alert('Oops! Try again! 🤔');
+                    document.getElementById('challengeAnswer').value = '';
+                }
+            },
+            
+            showSettings() {
+                this.renderCategorySettings();
+                this.renderLevelSettings();
+                this.openModal('settingsModal');
+            },
+            
+            renderCategorySettings() {
+                const container = document.getElementById('categorySettings');
+                container.innerHTML = '';
+                
+                Object.entries(this.categories).forEach(([key, cat]) => {
+                    const div = document.createElement('div');
+                    div.className = 'setting-item';
+                    div.innerHTML = `
+                        <div style="font-weight: 600; margin-bottom: 8px;">${cat.icon} ${cat.name}</div>
+                        <div class="setting-label">Daily Threshold</div>
+                        <input type="number" class="setting-input" id="threshold-${key}" 
+                               value="${cat.threshold}" step="0.25" min="0.25">
+                        <div class="setting-label" style="margin-top: 8px;">Multiplier</div>
+                        <input type="number" class="setting-input" id="multiplier-${key}" 
+                               value="${cat.multiplier}" step="1" min="1">
+                    `;
+                    container.appendChild(div);
+                });
+            },
+            
+            renderLevelSettings() {
+                const container = document.getElementById('levelSettings');
+                container.innerHTML = '';
+                
+                this.levels.forEach((level, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'level-config';
+                    div.innerHTML = `
+                        <div class="level-config-header">Level ${index + 1} (Score: ${level.threshold}+)</div>
+                        <div class="setting-label">Score Threshold</div>
+                        <input type="number" class="setting-input" id="level-threshold-${index}" 
+                               value="${level.threshold}" step="10" min="0">
+                        <div class="setting-label" style="margin-top: 8px;">Title</div>
+                        <input type="text" class="setting-input" id="level-title-${index}" 
+                               value="${level.title}">
+                        <div class="setting-label" style="margin-top: 8px;">Subtitle</div>
+                        <input type="text" class="setting-input" id="level-subtitle-${index}" 
+                               value="${level.subtitle}">
+                        <div class="file-input-wrapper" style="margin-top: 8px;">
+                            <input type="file" class="file-input" id="level-photo-${index}" 
+                                   accept="image/*" onchange="app.handlePhotoUpload(${index}, event)">
+                            <label for="level-photo-${index}" class="file-input-label">
+                                📷 ${level.photo ? 'Change Photo' : 'Upload Photo'}
+                            </label>
+                        </div>
+                        <div class="file-input-wrapper">
+                            <input type="file" class="file-input" id="level-sound-${index}" 
+                                   accept="audio/*" onchange="app.handleSoundUpload(${index}, event)">
+                            <label for="level-sound-${index}" class="file-input-label">
+                                🔊 ${level.sound ? 'Change Sound' : 'Upload Sound (Optional)'}
+                            </label>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+            
+            handlePhotoUpload(levelIndex, event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.levels[levelIndex].photo = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+            
+            handleSoundUpload(levelIndex, event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.levels[levelIndex].sound = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+            
+            saveSettings() {
+                // Save category settings
+                Object.keys(this.categories).forEach(key => {
+                    const threshold = parseFloat(document.getElementById(`threshold-${key}`).value);
+                    const multiplier = parseFloat(document.getElementById(`multiplier-${key}`).value);
+                    this.categories[key].threshold = threshold;
+                    this.categories[key].multiplier = multiplier;
+                });
+                
+                // Save level settings
+                this.levels.forEach((level, index) => {
+                    level.threshold = parseFloat(document.getElementById(`level-threshold-${index}`).value);
+                    level.title = document.getElementById(`level-title-${index}`).value;
+                    level.subtitle = document.getElementById(`level-subtitle-${index}`).value;
+                });
+                
+                this.saveData();
+                this.closeModal('settingsModal');
+                this.renderCategories();
+                this.updateDisplay();
+                
+                alert('Settings saved! 🎉');
+            },
+            
+            exportCSV() {
+                let csv = 'Date,';
+                csv += Object.keys(this.categories).join(',') + '\n';
+                
+                Object.entries(this.dailyData).forEach(([date, data]) => {
+                    csv += date + ',';
+                    csv += Object.keys(this.categories).map(key => data[key] || 0).join(',') + '\n';
+                });
+                
+                csv += '\nCATEGORY_CONFIG\n';
+                csv += 'Category,Threshold,Multiplier\n';
+                Object.entries(this.categories).forEach(([key, cat]) => {
+                    csv += `${cat.name},${cat.threshold},${cat.multiplier}\n`;
+                });
+                
+                csv += '\nLEVEL_CONFIG\n';
+                csv += 'Level,Threshold,Title,Subtitle\n';
+                this.levels.forEach((level, index) => {
+                    csv += `${index + 1},${level.threshold},"${level.title}","${level.subtitle}"\n`;
+                });
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `healthy-eats-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+            },
+            
+            importCSV() {
+                document.getElementById('csvFileInput').click();
+            },
+            
+            handleCSVImport(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const text = e.target.result;
+                        const lines = text.split('\n');
+                        
+                        // Import daily data
+                        const headers = lines[0].split(',').slice(1);
+                        let i = 1;
+                        while (i < lines.length && !lines[i].includes('CATEGORY_CONFIG')) {
+                            if (lines[i].trim()) {
+                                const parts = lines[i].split(',');
+                                const date = parts[0];
+                                this.dailyData[date] = {};
+                                headers.forEach((header, index) => {
+                                    const key = Object.keys(this.categories).find(k => 
+                                        this.categories[k].name === header.trim());
+                                    if (key) {
+                                        this.dailyData[date][key] = parseFloat(parts[index + 1]) || 0;
+                                    }
+                                });
+                            }
+                            i++;
+                        }
+                        
+                        // Import category config
+                        if (lines[i] && lines[i].includes('CATEGORY_CONFIG')) {
+                            i += 2; // Skip header
+                            while (i < lines.length && !lines[i].includes('LEVEL_CONFIG')) {
+                                if (lines[i].trim()) {
+                                    const parts = lines[i].split(',');
+                                    const key = Object.keys(this.categories).find(k => 
+                                        this.categories[k].name === parts[0]);
+                                    if (key) {
+                                        this.categories[key].threshold = parseFloat(parts[1]);
+                                        this.categories[key].multiplier = parseFloat(parts[2]);
+                                    }
+                                }
+                                i++;
+                            }
+                        }
+                        
+                        // Import level config
+                        if (lines[i] && lines[i].includes('LEVEL_CONFIG')) {
+                            i += 2; // Skip header
+                            let levelIndex = 0;
+                            while (i < lines.length && lines[i].trim()) {
+                                const parts = lines[i].split(',');
+                                if (parts.length >= 4 && this.levels[levelIndex]) {
+                                    this.levels[levelIndex].threshold = parseFloat(parts[1]);
+                                    this.levels[levelIndex].title = parts[2].replace(/"/g, '');
+                                    this.levels[levelIndex].subtitle = parts[3].replace(/"/g, '');
+                                    levelIndex++;
+                                }
+                                i++;
+                            }
+                        }
+                        
+                        this.saveData();
+                        this.renderCategories();
+                        this.updateDisplay();
+                        alert('Data imported successfully! 🎉');
+                    } catch (error) {
+                        alert('Error importing CSV. Please check the file format.');
+                        console.error(error);
+                    }
+                };
+                reader.readAsText(file);
+            },
+            
+            openModal(modalId) {
+                document.getElementById(modalId).classList.add('active');
+            },
+            
+            closeModal(modalId) {
+                document.getElementById(modalId).classList.remove('active');
+            }
+        };
+        
+        // Initialize app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => app.init());
+        } else {
+            app.init();
+        }
+    </script>
+</body>
+</html>
