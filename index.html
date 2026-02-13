@@ -922,38 +922,144 @@
             mathChallenge: { num1: 0, num2: 0, answer: 0 },
             editModeChallenge: { num1: 0, num2: 0, answer: 0 },
             isEditMode: false,
+            db: null,
+            
+            // IndexedDB methods
+            async initDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open('HealthyEatsDB', 1);
+                    
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => {
+                        this.db = request.result;
+                        resolve(this.db);
+                    };
+                    
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        
+                        // Create object stores if they don't exist
+                        if (!db.objectStoreNames.contains('dailyData')) {
+                            db.createObjectStore('dailyData', { keyPath: 'date' });
+                        }
+                        if (!db.objectStoreNames.contains('settings')) {
+                            db.createObjectStore('settings', { keyPath: 'key' });
+                        }
+                    };
+                });
+            },
+            
+            async saveToIndexedDB(storeName, data) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.put(data);
+                    
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            },
+            
+            async getFromIndexedDB(storeName, key) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readonly');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.get(key);
+                    
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+            
+            async getAllFromIndexedDB(storeName) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readonly');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.getAll();
+                    
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+            },
+            
+            async deleteFromIndexedDB(storeName, key) {
+                return new Promise((resolve, reject) => {
+                    const transaction = this.db.transaction([storeName], 'readwrite');
+                    const store = transaction.objectStore(storeName);
+                    const request = store.delete(key);
+                    
+                    request.onsuccess = () => resolve();
+                    request.onerror = () => reject(request.error);
+                });
+            },
             
             init() {
-                this.loadData();
-                this.renderCategories();
-                this.updateDisplay();
+                this.initDB().then(() => {
+                    this.loadData();
+                }).catch(error => {
+                    console.error('Failed to initialize database:', error);
+                    alert('Failed to initialize database. Please try refreshing the page.');
+                });
             },
             
-            loadData() {
-                const stored = localStorage.getItem('healthyEatsData');
-                if (stored) {
-                    const data = JSON.parse(stored);
-                    this.dailyData = data.dailyData || {};
-                    if (data.categories) this.categories = data.categories;
-                    if (data.levels) this.levels = data.levels;
-                }
-                
-                // Ensure current date has data structure
-                if (!this.dailyData[this.currentDate]) {
-                    this.dailyData[this.currentDate] = {};
-                    Object.keys(this.categories).forEach(cat => {
-                        this.dailyData[this.currentDate][cat] = 0;
+            async loadData() {
+                try {
+                    // Load daily data
+                    const allDailyData = await this.getAllFromIndexedDB('dailyData');
+                    this.dailyData = {};
+                    allDailyData.forEach(item => {
+                        this.dailyData[item.date] = item.data;
                     });
+                    
+                    // Load categories
+                    const categoriesData = await this.getFromIndexedDB('settings', 'categories');
+                    if (categoriesData) {
+                        this.categories = categoriesData.value;
+                    }
+                    
+                    // Load levels
+                    const levelsData = await this.getFromIndexedDB('settings', 'levels');
+                    if (levelsData) {
+                        this.levels = levelsData.value;
+                    }
+                    
+                    // Ensure current date has data structure
+                    if (!this.dailyData[this.currentDate]) {
+                        this.dailyData[this.currentDate] = {};
+                        Object.keys(this.categories).forEach(cat => {
+                            this.dailyData[this.currentDate][cat] = 0;
+                        });
+                    }
+                    
+                    this.renderCategories();
+                    this.updateDisplay();
+                } catch (error) {
+                    console.error('Error loading data:', error);
                 }
             },
             
-            saveData() {
-                const data = {
-                    dailyData: this.dailyData,
-                    categories: this.categories,
-                    levels: this.levels
-                };
-                localStorage.setItem('healthyEatsData', JSON.stringify(data));
+            async saveData() {
+                try {
+                    // Save current date's data
+                    await this.saveToIndexedDB('dailyData', {
+                        date: this.currentDate,
+                        data: this.dailyData[this.currentDate]
+                    });
+                    
+                    // Save categories
+                    await this.saveToIndexedDB('settings', {
+                        key: 'categories',
+                        value: this.categories
+                    });
+                    
+                    // Save levels
+                    await this.saveToIndexedDB('settings', {
+                        key: 'levels',
+                        value: this.levels
+                    });
+                } catch (error) {
+                    console.error('Error saving data:', error);
+                }
             },
             
             renderCategories() {
@@ -1101,7 +1207,7 @@
                 audioEl.src = '';
             },
             
-            previousDay() {
+            async previousDay() {
                 const date = new Date(this.currentDate);
                 date.setDate(date.getDate() - 1);
                 this.currentDate = date.toISOString().split('T')[0];
@@ -1117,7 +1223,7 @@
                 this.updateDisplay();
             },
             
-            nextDay() {
+            async nextDay() {
                 const date = new Date(this.currentDate);
                 const today = new Date().toISOString().split('T')[0];
                 
@@ -1319,7 +1425,7 @@
                 }
             },
             
-            saveSettings() {
+            async saveSettings() {
                 // Save category settings
                 Object.keys(this.categories).forEach(key => {
                     const threshold = parseFloat(document.getElementById(`threshold-${key}`).value);
@@ -1335,7 +1441,7 @@
                     level.subtitle = document.getElementById(`level-subtitle-${index}`).value;
                 });
                 
-                this.saveData();
+                await this.saveData();
                 this.closeModal('settingsModal');
                 this.renderCategories();
                 this.updateDisplay();
@@ -1343,13 +1449,16 @@
                 alert('Settings saved! 🎉');
             },
             
-            exportCSV() {
+            async exportCSV() {
+                // Get all daily data from IndexedDB
+                const allDailyData = await this.getAllFromIndexedDB('dailyData');
+                
                 let csv = 'Date,';
                 csv += Object.keys(this.categories).join(',') + '\n';
                 
-                Object.entries(this.dailyData).forEach(([date, data]) => {
-                    csv += date + ',';
-                    csv += Object.keys(this.categories).map(key => data[key] || 0).join(',') + '\n';
+                allDailyData.forEach(item => {
+                    csv += item.date + ',';
+                    csv += Object.keys(this.categories).map(key => item.data[key] || 0).join(',') + '\n';
                 });
                 
                 csv += '\nCATEGORY_CONFIG\n';
@@ -1377,12 +1486,12 @@
                 document.getElementById('csvFileInput').click();
             },
             
-            handleCSVImport(event) {
+            async handleCSVImport(event) {
                 const file = event.target.files[0];
                 if (!file) return;
                 
                 const reader = new FileReader();
-                reader.onload = (e) => {
+                reader.onload = async (e) => {
                     try {
                         const text = e.target.result;
                         const lines = text.split('\n');
@@ -1394,14 +1503,22 @@
                             if (lines[i].trim()) {
                                 const parts = lines[i].split(',');
                                 const date = parts[0];
-                                this.dailyData[date] = {};
+                                const dateData = {};
                                 headers.forEach((header, index) => {
                                     const key = Object.keys(this.categories).find(k => 
                                         this.categories[k].name === header.trim());
                                     if (key) {
-                                        this.dailyData[date][key] = parseFloat(parts[index + 1]) || 0;
+                                        dateData[key] = parseFloat(parts[index + 1]) || 0;
                                     }
                                 });
+                                
+                                // Save each day's data to IndexedDB
+                                await this.saveToIndexedDB('dailyData', {
+                                    date: date,
+                                    data: dateData
+                                });
+                                
+                                this.dailyData[date] = dateData;
                             }
                             i++;
                         }
@@ -1439,7 +1556,7 @@
                             }
                         }
                         
-                        this.saveData();
+                        await this.saveData();
                         this.renderCategories();
                         this.updateDisplay();
                         alert('Data imported successfully! 🎉');
